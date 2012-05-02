@@ -1,5 +1,5 @@
-var net     = require('net'),
-    recon   = require('recon');
+var net             = require('net');
+var EventEmitter    = require('events').EventEmitter;
 
 var SMS = function(config) {
     
@@ -10,10 +10,13 @@ var SMS = function(config) {
     this.buffer.fill('\0');    
     
     // connection flag
-    this._connected      = false;
+    this._connected     = false;
     
     // queue for unsent buffers
-    this._queue          = [];
+    this._queue         = [];
+    
+    // EventEmitter
+    this.ee             = new EventEmitter;
 };
 
 
@@ -21,24 +24,49 @@ SMS.prototype.createConnection = function(port, host) {
 
     var that = this;
     
-    // create connection
-    this.connection = recon(port || 8000, host || '202.39.54.130', function() {
+    // create connection    
+    (function connect () {
     
-        // connection flag
-        that._connected = true;
+        that.connection = net.createConnection(port || 8000, host || '202.39.54.130', function() {
         
-        // see if queued
-        if(that._queue.length !== 0) {        
+        
+            // connection flag
+            that._connected = true;
             
-            // write the queued buffers
-            for(var i = 0, len = that._queue.length; i < len; i++) {
-                that.write(that._queue[i]);
+            // see if queued
+            if(that._queue.length !== 0) {        
+                
+                // write the queued buffers
+                for(var i = 0, len = that._queue.length; i < len; i++) {
+                    that.write(that._queue[i]);
+                }
+               
+                // clear the queue
+                that._queue = [];
             }
-           
-            // clear the queue
-            that._queue = [];
-        }
-    });
+        });
+                
+        
+        that.connection.on('close', function () {
+        
+            console.log('close')
+            setTimeout(connect, 200);
+        });
+        
+        that.connection.on('error', function (err) {
+        
+            if (err.code === 'ECONNREFUSED') {
+                //console.log('retry')
+                //setTimeout(connect, 1000);
+            }
+            
+        });
+        
+        
+        
+        
+    })();
+    
     return this;
 }
 
@@ -67,6 +95,7 @@ SMS.prototype.write = function(buffer) {
 
 
     if(this._connected) {
+    
         // WRITE!
         this.connection.write(this.buffer);
         
