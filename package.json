@@ -2,15 +2,17 @@
   "author": "Elliot Lai <ellliotlai@gmail.com>",
   "name": "hinet-sms",
   "description": "hinet-sms protocal implementation",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "repository": {
     "type": "git",
     "url": "git://github.com/elliotlai/nodejs-hinet-sms.git"
   },
   "main": "main.js",
   "engines": {
-    "node": "~0.6.6"
+    "node": "~ 0.6.6"
   },
-  "dependencies": {},
+  "dependencies": {
+    "recon": "~ 0.0.8"
+  },
   "devDependencies": {}
 }

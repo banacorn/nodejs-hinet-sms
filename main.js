@@ -1,4 +1,5 @@
-var net = require('net');
+var net     = require('net'),
+    recon   = require('recon');
 
 var SMS = function(config) {
     
@@ -21,7 +22,7 @@ SMS.prototype.createConnection = function(port, host) {
     var that = this;
     
     // create connection
-    this.connection = net.connect(port || 8000, host || '202.39.54.130', function() {
+    this.connection = recon(port || 8000, host || '202.39.54.130', function() {
     
         // connection flag
         that._connected = true;
